@@ -1,2 +1,2 @@
 # thermo-network
-network system for thermofluids problems
+This code builds a network system for thermofluids problems
