@@ -57,3 +57,40 @@ function stegerwarmingrk1!(t,uu)
     t = t + Δt
     return t,uunew
 end
+
+"""
+    this function's inputs are t and w and impulsesystem
+
+        t is the current time
+
+        w has 1 row
+        the 1st row is h (enthalpy)
+
+        impulsesystem is an ImpulseSystem struct
+
+    this function's outputs are new t and out
+
+        t is the current time
+
+        out has the same structure as w
+
+    this function uses upwind scheme and 1st order Euler time marching
+
+    The current function is only good for information tavelling to the right
+"""
+
+function upwindrk1!(t::Any,w::Any,impulsesystem::Any)
+
+    ρ = impulsesystem.ρ
+    G = impulsesystem.G
+    P = impulsesystem.P
+    Ac = impulsesystem.Ac
+    qw = impulsesystem.qw
+    Δt = impulsesystem.Δt
+    Δz = impulsesystem.Δz
+
+    out = deepcopy(w) .+ (-G/ρ.*upwind(w,Δz) .+ P*qw/Ac/ρ).*Δt
+
+    t = deepcopy(t) .+ Δt
+    return t,out
+end

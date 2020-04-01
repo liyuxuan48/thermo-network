@@ -66,3 +66,14 @@ function uutourhop(uu::Any, gamma::Float64)
     return tourhop
 
 end
+
+"""
+this function's inputs is x
+
+    x is the coordinate
+
+this function's outputs is a Float value
+
+    this function is the heaviside step function (half-maximum convention)
+"""
+heaviside(x::AbstractFloat) = ifelse(x < 0, zero(x), ifelse(x > 0, one(x), oftype(x,0.5)))
