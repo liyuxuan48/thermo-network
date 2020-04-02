@@ -1,3 +1,10 @@
+module TimeMarching
+
+export  stegerwarmingrk1!,upwindrk1!
+
+using ..Tools
+using ..FiniteDifference
+
 """
     this function's inputs are t and uu
 
@@ -20,7 +27,12 @@
     The current function is only good for u<=c (speed of sound)
 """
 
-function stegerwarmingrk1!(t,uu,righthand)
+function stegerwarmingrk1!(t,uu,righthand,shocktubesystem)
+
+    gamma=shocktubesystem.gamma
+    Δt=shocktubesystem.Δt
+    Δx=shocktubesystem.Δz
+
 
     #u<=c
     urhoc = uutourhoc(uu,gamma)
@@ -93,4 +105,6 @@ function upwindrk1!(t::Any,w::Any,impulsesystem::Any)
 
     t = deepcopy(t) .+ Δt
     return t,out
+end
+
 end

@@ -1,3 +1,6 @@
+module Initial
+
+export initial_sod,initial_static,initial_uniform
 """
     this function's inputs are nx, xlim, and gamma
 
@@ -93,5 +96,7 @@ function initial_uniform(nx::Int64, xlim::Any, gamma::Float64)
     uu[3,:] = urhop[3,:]/(gamma-1) + 0.5urhop[2,:].*urhop[1,:].^2;
 
     return ux,uu
+
+end
 
 end

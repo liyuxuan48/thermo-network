@@ -1,3 +1,7 @@
+module FiniteDifference
+
+export upwind,downwind,central
+
 """
     this function's inputs are w and Δz
 
@@ -83,4 +87,6 @@ function central(w::Array,Δz::Float64)
     out[NX]=out[NX-1]
 
     return out
+end
+
 end

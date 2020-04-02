@@ -1,3 +1,8 @@
+module Systems
+
+export ImpulseSystem,ShockTubeSystem,UUtoEverything
+
+using ..Tools
 """
 impulsesystem is a struct containing
 
@@ -16,6 +21,20 @@ struct ImpulseSystem
     P
     Ac
     qw
+    Δt
+    Δz
+end
+
+"""
+shocktubesystem is a struct containing
+
+    gamma = gamma
+    Δt = time interval
+    Δz = space interval
+"""
+
+struct ShockTubeSystem
+    gamma
     Δt
     Δz
 end
@@ -55,5 +74,7 @@ function UUtoEverything(uu,gamma)
     h = ϵ.+p./ρ
 
 return UUtoEverything(u,ρ,m,p,e,ϵ,h,gamma)
+
+end
 
 end

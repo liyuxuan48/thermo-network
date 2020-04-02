@@ -1,3 +1,7 @@
+module Tools
+
+export uutourhoc,uutourhop,heaviside,set_h_boundary!
+
 """
     this function's inputs are uu and gamma
 
@@ -78,51 +82,4 @@ this function's outputs is a Float value
 """
 heaviside(x::AbstractFloat) = ifelse(x < 0, zero(x), ifelse(x > 0, one(x), oftype(x,0.5)))
 
-
-function set_h_boundary!(uu::Array,everythinginitial::UUtoEverything)
-
-    gamma = everythinginitial.gamma
-    h = everythinginitial.h
-
-
-    uueverything = UUtoEverything(uu,gamma)
-
-    u = uueverything.u
-    ρ = uueverything.ρ
-
-    ϵ = h./gamma
-    e = ρ.*ϵ + 0.5.*ρ.*u.*u
-
-    uunew = Array{Float64,2}(UndefInitializer(), 3,size(uu)[2])
-
-    uunew[1,:]=uu[1,:]
-    uunew[2,:]=uu[2,:]
-    uunew[3,:]=e
-
-return uunew[:,1]
 end
-
-"""
-function setuuboundary!(uu::Array,everythinginitial::UUtoEverything)
-
-    gamma = everythinginitial.gamma
-    h = everythinginitial.h
-
-
-    uueverything = UUtoEverything(uu,gamma)
-
-    u = uueverything.u
-    ρ = uueverything.ρ
-
-    ϵ = h./gamma
-    e = ρ.*ϵ + 0.5.*ρ.*u.*u
-
-    uunew = Array{Float64,2}(UndefInitializer(), 3,size(uu)[2])
-
-    uunew[1,:]=everythinginitial.ρ
-    uunew[2,:]=everythinginitial.m
-    uunew[3,:]=e
-
-return uunew[:,1]
-end
-"""
