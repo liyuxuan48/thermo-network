@@ -20,7 +20,7 @@
     The current function is only good for u<=c (speed of sound)
 """
 
-function stegerwarmingrk1!(t,uu)
+function stegerwarmingrk1!(t,uu,righthand)
 
     #u<=c
     urhoc = uutourhoc(uu,gamma)
@@ -47,7 +47,7 @@ function stegerwarmingrk1!(t,uu)
     fminus[3,:] = (rho./(2gamma)).*((((u-c).^3)/2)+((3-gamma).*(u-c).*c.^2)./(2(gamma-1)))
 
     for i in 2:1:length(uu[1,:])-1 # shrink a grid
-        uunew[:,i] = (-(fplus[:,i]-fplus[:,i-1])/Δx)*Δt + (-(fminus[:,i+1]-fminus[:,i])/Δx)*Δt + uu[:,i]
+        uunew[:,i] = (-(fplus[:,i]-fplus[:,i-1])/Δx)*Δt + (-(fminus[:,i+1]-fminus[:,i])/Δx)*Δt .+ righthand*Δt + uu[:,i]
     end
 
     # deal with the side

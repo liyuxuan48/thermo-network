@@ -19,3 +19,41 @@ struct ImpulseSystem
     Δt
     Δz
 end
+
+"""
+UUtoEverything is a struct containing all the thermodyamic values and flow velocity
+
+    u = flow velocity
+    ρ = density
+    m = mass flow rate
+    p = pressure
+    e = total energy per mass
+    ϵ = internal energy per mass
+    h = enthalpy per mass
+
+"""
+
+struct UUtoEverything
+    u
+    ρ
+    m
+    p
+    e
+    ϵ
+    h
+    gamma
+end
+
+function UUtoEverything(uu,gamma)
+
+    u = uu[2,:]./uu[1,:]
+    ρ = uu[1,:]
+    m = u.*ρ
+    p = uutourhop(uu,gamma)[3,:]
+    e = uu[3,:]
+    ϵ = p./ρ./(gamma-1)
+    h = ϵ.+p./ρ
+
+return UUtoEverything(u,ρ,m,p,e,ϵ,h,gamma)
+
+end
