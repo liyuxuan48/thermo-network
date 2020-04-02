@@ -69,7 +69,7 @@ function UUtoEverything(uu,gamma)
     ρ = uu[1,:]
     m = u.*ρ
     p = uutourhop(uu,gamma)[3,:]
-    e = uu[3,:]
+    e = uu[3,:]./ρ
     ϵ = p./ρ./(gamma-1)
     h = ϵ.+p./ρ
 
