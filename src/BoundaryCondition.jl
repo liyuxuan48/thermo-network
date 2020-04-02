@@ -16,13 +16,13 @@ using..Systems
         ρ = uueverything.ρ
 
         ϵ = h./gamma
-        e = ρ.*ϵ + 0.5.*ρ.*u.*u
+        Ehat = ρ.*ϵ + 0.5.*ρ.*u.*u
 
         uunew = Array{Float64,2}(UndefInitializer(), 3,size(uu)[2])
 
         uunew[1,:]=uu[1,:]
         uunew[2,:]=uu[2,:]
-        uunew[3,:]=e
+        uunew[3,:]=Ehat
 
     return uunew[:,1]
     end
@@ -40,13 +40,13 @@ using..Systems
         ρ = uueverything.ρ
 
         ϵ = h./gamma
-        e = ρ.*ϵ + 0.5.*ρ.*u.*u
+        Ehat = ρ.*ϵ + 0.5.*ρ.*u.*u
 
         uunew = Array{Float64,2}(UndefInitializer(), 3,size(uu)[2])
 
         uunew[1,:]=everythinginitial.ρ
         uunew[2,:]=everythinginitial.m
-        uunew[3,:]=e
+        uunew[3,:]=Ehat
 
     return uunew[:,1]
     end

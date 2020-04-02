@@ -18,12 +18,9 @@ export initial_sod,initial_static,initial_uniform
         uu has 3 rows
         the 1st row is u (velocity)
         the 2nd row is m (mass flow rate)
-        the 3rd row is e (total energy per mass)
+        the 3rd row is ̂E (total energy per volume)
 
     this function initialize the Sod shock tube problem (Steger and Warming, 1981)
-
-
-    The current function is only good for u<=c (speed of sound)
 """
 
 function initial_sod(nx::Int64, xlim::Any, gamma::Float64)
@@ -50,6 +47,27 @@ function initial_sod(nx::Int64, xlim::Any, gamma::Float64)
 
 end
 
+"""
+    this function's inputs are nx, xlim, and gamma
+
+        nx is the number of grid points
+
+        xlim is the limits of the domain
+
+        gamma is the heat capacity ratio
+
+    this function's outputs are ux and uu
+
+        ux has 1 row
+        the 1st row is x (x cooridnates)
+
+        uu has 3 rows
+        the 1st row is u (velocity)
+        the 2nd row is m (mass flow rate)
+        the 3rd row is ̂E (total energy per volume)
+
+    this function initialize the Sod shock tube problem (Steger and Warming, 1981)
+"""
 function initial_static(nx::Int64, xlim::Any, gamma::Float64)
 
     Lx = xlim[2]-xlim[1];
@@ -74,7 +92,27 @@ function initial_static(nx::Int64, xlim::Any, gamma::Float64)
 
 end
 
+"""
+    this function's inputs are nx, xlim, and gamma
 
+        nx is the number of grid points
+
+        xlim is the limits of the domain
+
+        gamma is the heat capacity ratio
+
+    this function's outputs are ux and uu
+
+        ux has 1 row
+        the 1st row is x (x cooridnates)
+
+        uu has 3 rows
+        the 1st row is u (velocity)
+        the 2nd row is m (mass flow rate)
+        the 3rd row is ̂E (total energy per volume)
+
+    this function initialize the Sod shock tube problem (Steger and Warming, 1981)
+"""
 function initial_uniform(nx::Int64, xlim::Any, gamma::Float64)
 
     Lx = xlim[2]-xlim[1];

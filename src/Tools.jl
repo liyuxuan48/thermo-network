@@ -8,7 +8,7 @@ export uutourhoc,uutourhop,heaviside,set_h_boundary!
         uu has 3 rows
         the 1st row is u (velocity)
         the 2nd row is m (mass flow rate)
-        the 3rd row is e (total energy per mass)
+        the 3rd row is ̂E (total energy per volume)
 
         gamma is the heat capacity ratio
 
@@ -44,7 +44,7 @@ end
         uu has 3 rows
         the 1st row is u (velocity)
         the 2nd row is m (mass flow rate)
-        the 3rd row is e (total energy per mass)
+        the 3rd row is ̂E (total energy per volume)
 
         gamma is the heat capacity ratio
 
