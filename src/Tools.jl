@@ -79,7 +79,7 @@ this function's outputs is a Float value
 heaviside(x::AbstractFloat) = ifelse(x < 0, zero(x), ifelse(x > 0, one(x), oftype(x,0.5)))
 
 
-function sethboundary!(uu::Array,everythinginitial::UUtoEverything)
+function set_h_boundary!(uu::Array,everythinginitial::UUtoEverything)
 
     gamma = everythinginitial.gamma
     h = everythinginitial.h
