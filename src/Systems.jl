@@ -73,7 +73,7 @@ function UUtoEverything(uu,gamma)
     e = uu[3,:]./ρ
     ϵ = p./ρ./(gamma-1)
     h = ϵ.+p./ρ
-    c = sqrt(gamma.*p./ρ)
+    c = sqrt.(gamma.*p./ρ)
 return UUtoEverything(u,ρ,m,p,e,ϵ,h,gamma,c)
 
 end
