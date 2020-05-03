@@ -29,9 +29,6 @@ using..Systems
             λ[3] = u[end]
             λ[4] = u[end]
             λ[5] = u[end]+c[end]
-            println("gamma=",gamma)
-            println("uu=",uu[end])
-            println("uueverything=",uueverything[end])
 
             # get L1,L2,L3,L4,L5
             L = Array{Float64,1}(UndefInitializer(), 5)
@@ -40,11 +37,10 @@ using..Systems
             L[3]=λ[3].*0
             L[4]=λ[4].*0
             L[5]=λ[5].*((p[end]-p[end-1])./Δx+ρ[end].*c[end].*(u[end]-u[end-1])./Δx)
-            println("L=",L)
+#             println("L=",L)
 
         return L
         end
-
 
         """
             get the d from L
@@ -52,26 +48,25 @@ using..Systems
 
         function get_d_from_L(uu::Array,everythinginitial,L::Array)
 
-                # import variables
-                gamma = everythinginitial.gamma
+        # import variables
+        gamma = everythinginitial.gamma
 
+        uueverything = UUtoEverything(uu,gamma)
 
-                uueverything = UUtoEverything(uu,gamma)
+        u = uueverything.u
+        ρ = uueverything.ρ
+        c = uueverything.c
+        p = uueverything.p
 
-                u = uueverything.u
-                ρ = uueverything.ρ
-                c = uueverything.c
-                p = uueverything.p
+        # get d1,d2,d3,d4,d5
+        d = Array{Float64}(UndefInitializer(), 5)
+        d[1] = 1 ./ (c[end].^2).*(L[2]+0.5.*(L[5]+L[1]))
+        d[2] = 0.5 .* (L[5]+L[1])
+        d[3] = 0.5 ./ρ[end]./c[end] .* (L[5]-L[1])
+        d[4] = 0
+        d[5] = 0
 
-                # get d1,d2,d3,d4,d5
-                d = Array{Float64}(UndefInitializer(), 5)
-                d[1] = 1 ./ (c[end].^2).*(L[2]+0.5.*(L[5]+L[1]))
-                d[2] = 0.5 .* (L[5]+L[1])
-                d[3] = 0.5 ./ρ[end]./c[end] .* (L[5]-L[1])
-                d[4] = 0
-                d[5] = 0
-
-                return d
+        return d
         end
 
 
@@ -80,22 +75,21 @@ using..Systems
     """
     function set_outlet_nonreflect_boundary!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
 
+    L = get_L_from_nonreflect(uu,everythinginitial,Δx)
+    d = get_d_from_L(uu,everythinginitial,L)
 
-        L = get_L_from_nonreflect(uu,everythinginitial,Δx)
-        d = get_d_from_L(uu,everythinginitial,L)
+    gamma = everythinginitial.gamma
+    h = everythinginitial.h
 
-        gamma = everythinginitial.gamma
-        h = everythinginitial.h
+    uueverything = UUtoEverything(uu,gamma)
 
-        uueverything = UUtoEverything(uu,gamma)
+    u = uueverything.u
+    ρ = uueverything.ρ
 
-        u = uueverything.u
-        ρ = uueverything.ρ
-
-        uuend=Array{Float64,1}(UndefInitializer(), 3)
-        uuend[1]=uu[1,end] + (-d[1]).*Δt
-        uuend[2]=uu[2,end] + (-u[end].*d[1]-ρ[end].*d[3]+0).*Δt
-        uuend[3]=uu[3,end] + (-0.5 .* u[end].*u[end].*d[1]-d[2]./(gamma-1) - ρ[end].*u[end].*d[3] + 0).*Δt
+    uuend=Array{Float64,1}(UndefInitializer(), 3)
+    uuend[1]=uu[1,end] + (-d[1]).*Δt
+    uuend[2]=uu[2,end] + (-u[end].*d[1]-ρ[end].*d[3]+0).*Δt
+    uuend[3]=uu[3,end] + (-0.5 .* u[end].*u[end].*d[1]-d[2]./(gamma-1) - ρ[end].*u[end].*d[3] + 0).*Δt
 
     return uuend
     end
