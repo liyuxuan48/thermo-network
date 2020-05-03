@@ -11,7 +11,8 @@ using..Systems
 function get_L_from_constant_p(uu::Array,everythinginitial,Δx::Float64)
 
     L = get_L_from_nonreflect(uu,everythinginitial,Δx)
-    L[1] = -L[5] - 2 .* 0
+    dpdt = 0
+    L[1] = -L[5] - 2 .* dpdt
 
     return L
     end
