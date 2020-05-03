@@ -64,7 +64,7 @@ function stegerwarmingrk1!(t,uu,righthand,shocktubesystem)
 
     # deal with the side
     uunew[:,length(uunew[1,:])] = uu[:,length(uunew[1,:])]
-    uunew[:,1] = uunew[:,1+1]
+    uunew[:,1] = uu[:,1]
 
     t = t + Δt
     return t,uunew
