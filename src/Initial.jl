@@ -1,6 +1,6 @@
 module Initial
 
-export initial_sod,initial_static,initial_uniform
+export initial_sod,initial_static,initial_uniform,initial_one_wave
 """
     this function's inputs are nx, xlim, and gamma
 
