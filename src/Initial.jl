@@ -171,7 +171,7 @@ function initial_one_wave(nx::Int64, xlim::Any, gamma::Float64)
     ux = xlim[1]:Δx:xlim[2]
     urhop = Array{Float64,2}(UndefInitializer(), 3,length(ux))
 
-    urhop[1,:].=0
+    urhop[1,:].=1
     urhop[2,:].=0.01*exp.(-(collect(ux) .- 0.5.*(ux[end]-ux[1])).^2/0.1^2).+0.125
     urhop[3,:].=0.01*exp.(-(collect(ux) .- 0.5.*(ux[end]-ux[1])).^2/0.1^2).+1
 
