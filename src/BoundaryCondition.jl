@@ -28,6 +28,32 @@ using..Systems
     end
 
     """
+        still working on this
+    """
+    function set_outlet_nonreflect_h_boundary!(uu::Array,everythinginitial)
+
+        gamma = everythinginitial.gamma
+        h = everythinginitial.h
+
+
+        uueverything = UUtoEverything(uu,gamma)
+
+        u = uueverything.u
+        ρ = uueverything.ρ
+
+        ϵ = h./gamma
+        Ehat = ρ.*ϵ + 0.5.*ρ.*u.*u
+
+        uunew = Array{Float64,2}(UndefInitializer(), 3,size(uu)[2])
+
+        uunew[1,:]=uu[1,:]
+        uunew[2,:]=uu[2,:]
+        uunew[3,:]=Ehat
+
+    return uunew[:,1]
+    end
+
+    """
     function setuuboundary!(uu::Array,everythinginitial::UUtoEverything)
 
         gamma = everythinginitial.gamma
