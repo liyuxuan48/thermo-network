@@ -1,8 +1,59 @@
 module BoundaryCondition
 
-export set_outlet_nonreflect_boundary!,set_outlet_costant_p_boundary!,set_inlet_constant_h!,set_outlet_costant_h_boundary!
+export set_outlet_nonreflect_boundary!,set_outlet_costant_p_boundary!,set_inlet_constant_h!,set_outlet_costant_h_boundary!,set_inlet_interface!,set_outlet_interface!
 
 using..Systems
+
+function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64)
+
+            # import variables
+            gamma = everythinginitial1.gamma
+
+
+            uueverything1 = UUtoEverything(uu1,gamma)
+
+            u1 = uueverything1.u
+            ρ1 = uueverything1.ρ
+            c1 = uueverything1.c
+            p1 = uueverything1.p
+
+            # get λ1,λ2,λ3,λ4,λ5
+            λ1 = Array{Float64,1}(UndefInitializer(), 5)
+            λ1[1] = u1[end]-c1[end]
+            λ1[2] = u1[end]
+            λ1[3] = u1[end]
+            λ1[4] = u1[end]
+            λ1[5] = u1[end]+c1[end]
+
+            # get L2,L3,L4,L5 from upstream
+            L = Array{Float64,1}(UndefInitializer(), 5)
+            L[2]=λ1[2].*(c1[end].^2 .* (ρ1[end]-ρ1[end-1])./Δx-(p1[end]-p1[end-1])./Δx)
+            L[3]=λ1[3].*0
+            L[4]=λ1[4].*0
+            L[5]=λ1[5].*((p1[end]-p1[end-1])./Δx+ρ1[end].*c1[end].*(u1[end]-u1[end-1])./Δx)
+
+
+            uueverything2 = UUtoEverything(uu2,gamma)
+
+            u2 = uueverything2.u
+            ρ2 = uueverything2.ρ
+            c2 = uueverything2.c
+            p2 = uueverything2.p
+
+            # get λ1,λ2,λ3,λ4,λ5
+            λ2 = Array{Float64,1}(UndefInitializer(), 5)
+            λ2[1] = u2[end]-c2[end]
+            λ2[2] = u2[end]
+            λ2[3] = u2[end]
+            λ2[4] = u2[end]
+            λ2[5] = u2[end]+c2[end]
+
+            # get L1 from downstream
+            L[1] = λ2[1].*((p2[2]-p2[1])./Δx-ρ2[1].*c2[1].*(u2[2]-u2[1])./Δx)
+
+        return L
+        end
+
 
 """
     get the characteristic wave amplitudes L from constant enthalpy conditions
@@ -273,6 +324,49 @@ using..Systems
 
         return uubegin
         end
+
+        function set_inlet_interface!(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64,Δt::Float64)
+
+            L = get_L_from_interface(uu1,uu2,everythinginitial1,everythinginitial2,Δx)
+            d = get_d_from_L_outflow(uu1,everythinginitial1,L)
+
+            gamma = everythinginitial2.gamma
+            h = everythinginitial2.h
+
+            uueverything = UUtoEverything(uu2,gamma)
+
+            u = uueverything.u
+            ρ = uueverything.ρ
+
+            uubegin=Array{Float64,1}(UndefInitializer(), 3)
+            uubegin[1]=uu1[1,1] + (-d[1]).*Δt
+            uubegin[2]=uu1[2,1] + (-u[1].*d[1]-ρ[1].*d[3]+0).*Δt
+            uubegin[3]=uu1[3,1] + (-0.5 .* u[1].*u[1].*d[1]-d[2]./(gamma-1) - ρ[1].*u[1].*d[3] + 0).*Δt
+
+            return uubegin
+            end
+
+
+        function set_outlet_interface!(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64,Δt::Float64)
+
+            L = get_L_from_interface(uu1,uu2,everythinginitial1,everythinginitial2,Δx)
+            d = get_d_from_L_inflow(uu2,everythinginitial2,L)
+
+            gamma = everythinginitial1.gamma
+            h = everythinginitial1.h
+
+            uueverything = UUtoEverything(uu1,gamma)
+
+            u = uueverything.u
+            ρ = uueverything.ρ
+
+            uuend=Array{Float64,1}(UndefInitializer(), 3)
+            uuend[1]=uu2[1,end] + (-d[1]).*Δt
+            uuend[2]=uu2[2,end] + (-u[end].*d[1]-ρ[end].*d[3]+0).*Δt
+            uuend[3]=uu2[3,end] + (-0.5 .* u[end].*u[end].*d[1]-d[2]./(gamma-1) - ρ[end].*u[end].*d[3] + 0).*Δt
+
+            return uuend
+            end
 
 # """
 #     still working on this
