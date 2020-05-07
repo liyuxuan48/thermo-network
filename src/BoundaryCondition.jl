@@ -1,8 +1,31 @@
 module BoundaryCondition
 
-export set_outlet_nonreflect_boundary!,set_outlet_costant_p_boundary!,set_inlet_constant_h!
+export set_outlet_nonreflect_boundary!,set_outlet_costant_p_boundary!,set_inlet_constant_h!,set_outlet_costant_h_boundary!
 
 using..Systems
+
+"""
+    get the characteristic wave amplitudes L from constant enthalpy conditions
+"""
+
+    function get_L_from_constant_h(uu::Array,everythinginitial,Δx::Float64)
+
+    gamma=everythinginitial.gamma
+
+    uueverything = UUtoEverything(uu,gamma)
+
+    u = uueverything.u
+    ρ = uueverything.ρ
+    c = uueverything.c
+    p = uueverything.p
+    h = uueverything.h
+
+    L = get_L_from_nonreflect(uu,everythinginitial,Δx)
+    dhdt = 0
+    L[1] = (-dhdt .* ρ[end] .* c[end].^2 ./h[end] + L[2]) .*2 ./(gamma-1) - L[5]
+
+    return L
+    end
 
 """
     get the characteristic wave amplitudes L from constant pressure conditions
@@ -183,6 +206,31 @@ using..Systems
     function set_outlet_costant_p_boundary!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
 
     L = get_L_from_constant_p(uu,everythinginitial,Δx)
+    d = get_d_from_L_outflow(uu,everythinginitial,L)
+
+    gamma = everythinginitial.gamma
+    h = everythinginitial.h
+
+    uueverything = UUtoEverything(uu,gamma)
+
+    u = uueverything.u
+    ρ = uueverything.ρ
+
+    uuend=Array{Float64,1}(UndefInitializer(), 3)
+    uuend[1]=uu[1,end] + (-d[1]).*Δt
+    uuend[2]=uu[2,end] + (-u[end].*d[1]-ρ[end].*d[3]+0).*Δt
+    uuend[3]=uu[3,end] + (-0.5 .* u[end].*u[end].*d[1]-d[2]./(gamma-1) - ρ[end].*u[end].*d[3] + 0).*Δt
+
+    return uuend
+    end
+
+    """
+        still working on this
+    """
+
+    function set_outlet_costant_h_boundary!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
+
+    L = get_L_from_constant_h(uu,everythinginitial,Δx)
     d = get_d_from_L_outflow(uu,everythinginitial,L)
 
     gamma = everythinginitial.gamma
