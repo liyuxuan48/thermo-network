@@ -1,6 +1,8 @@
 module BoundaryCondition
 
-export set_outlet_nonreflect_boundary!,set_outlet_costant_p_boundary!,set_inlet_constant_h!,set_outlet_costant_h_boundary!,set_inlet_interface!,set_outlet_interface!
+export set_outlet_nonreflect_boundary!,set_outlet_costant_p_boundary!,
+set_inlet_constant_h!,set_outlet_costant_h_boundary!,set_inlet_interface!,set_outlet_interface!,
+get_L_from_interface,get_L_from_nonreflect,get_d_from_L_inflow,get_d_from_L_outflow
 
 using..Systems
 
@@ -25,6 +27,7 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             λ1[4] = u1[end]
             λ1[5] = u1[end]+c1[end]
 
+
             # get L2,L3,L4,L5 from upstream
             L = Array{Float64,1}(UndefInitializer(), 5)
             L[2]=λ1[2].*(c1[end].^2 .* (ρ1[end]-ρ1[end-1])./Δx-(p1[end]-p1[end-1])./Δx)
@@ -42,11 +45,11 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
 
             # get λ1,λ2,λ3,λ4,λ5
             λ2 = Array{Float64,1}(UndefInitializer(), 5)
-            λ2[1] = u2[end]-c2[end]
-            λ2[2] = u2[end]
-            λ2[3] = u2[end]
-            λ2[4] = u2[end]
-            λ2[5] = u2[end]+c2[end]
+            λ2[1] = u2[1]-c2[1]
+            λ2[2] = u2[1]
+            λ2[3] = u2[1]
+            λ2[4] = u2[1]
+            λ2[5] = u2[1]+c2[1]
 
             # get L1 from downstream
             L[1] = λ2[1].*((p2[2]-p2[1])./Δx-ρ2[1].*c2[1].*(u2[2]-u2[1])./Δx)
@@ -73,7 +76,7 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
 
     L = get_L_from_nonreflect(uu,everythinginitial,Δx)
     dhdt = 0
-    L[1] = (-dhdt .* ρ[end] .* c[end].^2 ./h[end] + L[2]) .*2 ./(gamma-1) - L[5]
+    L[1] = (-dhdt .* ρ[1] .* c[1].^2 ./h[1] + L[2]) .*2 ./(gamma-1) - L[5]
 
     return L
     end
@@ -328,7 +331,7 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         function set_inlet_interface!(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64,Δt::Float64)
 
             L = get_L_from_interface(uu1,uu2,everythinginitial1,everythinginitial2,Δx)
-            d = get_d_from_L_outflow(uu1,everythinginitial1,L)
+            d = get_d_from_L_inflow(uu2,everythinginitial1,L)
 
             gamma = everythinginitial2.gamma
             h = everythinginitial2.h
@@ -339,9 +342,9 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             ρ = uueverything.ρ
 
             uubegin=Array{Float64,1}(UndefInitializer(), 3)
-            uubegin[1]=uu1[1,1] + (-d[1]).*Δt
-            uubegin[2]=uu1[2,1] + (-u[1].*d[1]-ρ[1].*d[3]+0).*Δt
-            uubegin[3]=uu1[3,1] + (-0.5 .* u[1].*u[1].*d[1]-d[2]./(gamma-1) - ρ[1].*u[1].*d[3] + 0).*Δt
+            uubegin[1]=uu2[1,1] + (-d[1]).*Δt
+            uubegin[2]=uu2[2,1] + (-u[1].*d[1]-ρ[1].*d[3]+0).*Δt
+            uubegin[3]=uu2[3,1] + (-0.5 .* u[1].*u[1].*d[1]-d[2]./(gamma-1) - ρ[1].*u[1].*d[3] + 0).*Δt
 
             return uubegin
             end
@@ -350,7 +353,7 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         function set_outlet_interface!(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64,Δt::Float64)
 
             L = get_L_from_interface(uu1,uu2,everythinginitial1,everythinginitial2,Δx)
-            d = get_d_from_L_inflow(uu2,everythinginitial2,L)
+            d = get_d_from_L_outflow(uu1,everythinginitial2,L)
 
             gamma = everythinginitial1.gamma
             h = everythinginitial1.h
@@ -361,9 +364,9 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             ρ = uueverything.ρ
 
             uuend=Array{Float64,1}(UndefInitializer(), 3)
-            uuend[1]=uu2[1,end] + (-d[1]).*Δt
-            uuend[2]=uu2[2,end] + (-u[end].*d[1]-ρ[end].*d[3]+0).*Δt
-            uuend[3]=uu2[3,end] + (-0.5 .* u[end].*u[end].*d[1]-d[2]./(gamma-1) - ρ[end].*u[end].*d[3] + 0).*Δt
+            uuend[1]=uu1[1,end] + (-d[1]).*Δt
+            uuend[2]=uu1[2,end] + (-u[end].*d[1]-ρ[end].*d[3]+0).*Δt
+            uuend[3]=uu1[3,end] + (-0.5 .* u[end].*u[end].*d[1]-d[2]./(gamma-1) - ρ[end].*u[end].*d[3] + 0).*Δt
 
             return uuend
             end

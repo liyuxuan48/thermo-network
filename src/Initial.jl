@@ -172,8 +172,34 @@ function initial_one_wave(nx::Int64, xlim::Any, gamma::Float64)
     urhop = Array{Float64,2}(UndefInitializer(), 3,length(ux))
 
     urhop[1,:].=1
-    urhop[2,:].=0.01*exp.(-(collect(ux) .- 0.5.*(ux[end]-ux[1])).^2/0.1^2).+0.125
+    urhop[2,:].=0.001*exp.(-(collect(ux) .- 0.5.*(ux[end]-ux[1])).^2/0.1^2).+0.125
     urhop[3,:].=0.01*exp.(-(collect(ux) .- 0.5.*(ux[end]-ux[1])).^2/0.1^2).+1
+
+    #From urhop make uu (u rho*u e)
+    uu = Array{Float64,2}(UndefInitializer(), 3,length(ux))
+    uu[1,:] = urhop[2,:];
+    uu[2,:] = urhop[2,:].*urhop[1,:];
+    uu[3,:] = urhop[3,:]/(gamma-1) + 0.5urhop[2,:].*urhop[1,:].^2;
+
+    return ux,uu
+
+end
+
+"""
+still working on that initial one wave at a relative location
+"""
+function initial_one_wave(nx::Int64, xlim::Any, gamma::Float64, xposi::Float64)
+
+    Lx = xlim[2]-xlim[1];
+    Δx = Lx/(nx-1)
+
+    # Initialization of ux and urhop
+    ux = xlim[1]:Δx:xlim[2]
+    urhop = Array{Float64,2}(UndefInitializer(), 3,length(ux))
+
+    urhop[1,:].=1
+    urhop[2,:].=0.001*exp.(-(collect(ux) .- xposi.*(ux[end]-ux[1])).^2/0.1^2).+0.125
+    urhop[3,:].=0.01*exp.(-(collect(ux) .- xposi.*(ux[end]-ux[1])).^2/0.1^2).+1
 
     #From urhop make uu (u rho*u e)
     uu = Array{Float64,2}(UndefInitializer(), 3,length(ux))
