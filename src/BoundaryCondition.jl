@@ -6,13 +6,11 @@ get_L_from_interface,get_L_from_nonreflect,get_d_from_L_inflow,get_d_from_L_outf
 
 using..Systems
 
-function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64)
+function get_L_from_interface(uu1::Array,uu2::Array,pipesystem1,pipesystem2)
 
-            # import variables
-            gamma = everythinginitial1.gamma
+            Δx1 = pipesystem1.Δx
 
-
-            uueverything1 = UUtoEverything(uu1,gamma)
+            uueverything1 = UUtoEverything(uu1,pipesystem1)
 
             u1 = uueverything1.u
             ρ1 = uueverything1.ρ
@@ -30,13 +28,14 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
 
             # get L2,L3,L4,L5 from upstream
             L = Array{Float64,1}(UndefInitializer(), 5)
-            L[2]=λ1[2].*(c1[end].^2 .* (ρ1[end]-ρ1[end-1])./Δx-(p1[end]-p1[end-1])./Δx)
+            L[2]=λ1[2].*(c1[end].^2 .* (ρ1[end]-ρ1[end-1])./Δx1-(p1[end]-p1[end-1])./Δx1)
             L[3]=λ1[3].*0
             L[4]=λ1[4].*0
-            L[5]=λ1[5].*((p1[end]-p1[end-1])./Δx+ρ1[end].*c1[end].*(u1[end]-u1[end-1])./Δx)
+            L[5]=λ1[5].*((p1[end]-p1[end-1])./Δx1+ρ1[end].*c1[end].*(u1[end]-u1[end-1])./Δx1)
 
+            Δx2 = pipesystem2.Δx
 
-            uueverything2 = UUtoEverything(uu2,gamma)
+            uueverything2 = UUtoEverything(uu2,pipesystem2)
 
             u2 = uueverything2.u
             ρ2 = uueverything2.ρ
@@ -52,7 +51,7 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             λ2[5] = u2[1]+c2[1]
 
             # get L1 from downstream
-            L[1] = λ2[1].*((p2[2]-p2[1])./Δx-ρ2[1].*c2[1].*(u2[2]-u2[1])./Δx)
+            L[1] = λ2[1].*((p2[2]-p2[1])./Δx2-ρ2[1].*c2[1].*(u2[2]-u2[1])./Δx2)
 
         return L
         end
@@ -62,11 +61,11 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
     get the characteristic wave amplitudes L from constant enthalpy conditions
 """
 
-    function get_L_from_constant_h(uu::Array,everythinginitial,Δx::Float64)
+    function get_L_from_constant_h(uu::Array,pipesystem)
 
-    gamma=everythinginitial.gamma
+    gamma=pipesystem.gamma
 
-    uueverything = UUtoEverything(uu,gamma)
+    uueverything = UUtoEverything(uu,pipesystem)
 
     u = uueverything.u
     ρ = uueverything.ρ
@@ -74,7 +73,7 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
     p = uueverything.p
     h = uueverything.h
 
-    L = get_L_from_nonreflect(uu,everythinginitial,Δx)
+    L = get_L_from_nonreflect(uu,pipesystem)
     dhdt = 0
     L[1] = (-dhdt .* ρ[1] .* c[1].^2 ./h[1] + L[2]) .*2 ./(gamma-1) - L[5]
 
@@ -85,9 +84,9 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
     get the characteristic wave amplitudes L from constant pressure conditions
 """
 
-    function get_L_from_constant_p(uu::Array,everythinginitial,Δx::Float64)
+    function get_L_from_constant_p(uu::Array,pipesystem)
 
-    L = get_L_from_nonreflect(uu,everythinginitial,Δx)
+    L = get_L_from_nonreflect(uu,pipesystem)
     dpdt = 0
     L[1] = -L[5] - 2 .* dpdt
 
@@ -98,18 +97,19 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         get the characteristic wave amplitudes L from nonreflect conditions
     """
 
-    function get_L_from_nonreflect(uu::Array,everythinginitial,Δx::Float64)
+    function get_L_from_nonreflect(uu::Array,pipesystem)
 
             # import variables
-            gamma = everythinginitial.gamma
+            gamma = pipesystem.gamma
+            Δx = pipesystem.Δx
 
-
-            uueverything = UUtoEverything(uu,gamma)
+            uueverything = UUtoEverything(uu,pipesystem)
 
             u = uueverything.u
             ρ = uueverything.ρ
             c = uueverything.c
             p = uueverything.p
+            h = uueverything.h
 
             # get λ1,λ2,λ3,λ4,λ5
             λ = Array{Float64,1}(UndefInitializer(), 5)
@@ -135,13 +135,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             get the characteristic wave amplitudes L from constant enthalpy inflow
         """
 
-        function get_L_from_inflow_h(uu::Array,everythinginitial,Δx::Float64)
+        function get_L_from_inflow_h(uu::Array,pipesystem)
 
                     # import variables
-                    gamma = everythinginitial.gamma
+                    gamma = pipesystem.gamma
+                    Δx = pipesystem.Δx
 
-
-                    uueverything = UUtoEverything(uu,gamma)
+                    uueverything = UUtoEverything(uu,pipesystem)
 
                     u = uueverything.u
                     ρ = uueverything.ρ
@@ -175,12 +175,9 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             get the d from L for inflow
         """
 
-        function get_d_from_L_inflow(uu::Array,everythinginitial,L::Array)
+        function get_d_from_L_inflow(uu::Array,pipesystem,L::Array)
 
-                # import variables
-                gamma = everythinginitial.gamma
-
-                uueverything = UUtoEverything(uu,gamma)
+                uueverything = UUtoEverything(uu,pipesystem)
 
                 u = uueverything.u
                 ρ = uueverything.ρ
@@ -205,12 +202,10 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             get the d from L for outflow
         """
 
-        function get_d_from_L_outflow(uu::Array,everythinginitial,L::Array)
+        function get_d_from_L_outflow(uu::Array,pipesystem,L::Array)
 
         # import variables
-        gamma = everythinginitial.gamma
-
-        uueverything = UUtoEverything(uu,gamma)
+        uueverything = UUtoEverything(uu,pipesystem)
 
         u = uueverything.u
         ρ = uueverything.ρ
@@ -232,15 +227,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
     """
         still working on this
     """
-    function set_outlet_nonreflect_boundary!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
+    function set_outlet_nonreflect_boundary!(uu::Array,pipesystem,Δt::Float64)
 
-    L = get_L_from_nonreflect(uu,everythinginitial,Δx)
-    d = get_d_from_L_outflow(uu,everythinginitial,L)
+    L = get_L_from_nonreflect(uu,pipesystem)
+    d = get_d_from_L_outflow(uu,pipesystem,L)
 
-    gamma = everythinginitial.gamma
-    h = everythinginitial.h
-
-    uueverything = UUtoEverything(uu,gamma)
+    gamma = pipesystem.gamma
+    uueverything = UUtoEverything(uu,pipesystem)
 
     u = uueverything.u
     ρ = uueverything.ρ
@@ -257,15 +250,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         still working on this
     """
 
-    function set_outlet_costant_p_boundary!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
+    function set_outlet_costant_p_boundary!(uu::Array,pipesystem,Δt::Float64)
 
-    L = get_L_from_constant_p(uu,everythinginitial,Δx)
-    d = get_d_from_L_outflow(uu,everythinginitial,L)
+    L = get_L_from_constant_p(uu,pipesystem)
+    d = get_d_from_L_outflow(uu,pipesystem,L)
 
-    gamma = everythinginitial.gamma
-    h = everythinginitial.h
-
-    uueverything = UUtoEverything(uu,gamma)
+    gamma = pipesystem.gamma
+    uueverything = UUtoEverything(uu,pipesystem)
 
     u = uueverything.u
     ρ = uueverything.ρ
@@ -282,15 +273,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         still working on this
     """
 
-    function set_outlet_costant_h_boundary!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
+    function set_outlet_costant_h_boundary!(uu::Array,pipesystem,Δt::Float64)
 
-    L = get_L_from_constant_h(uu,everythinginitial,Δx)
-    d = get_d_from_L_outflow(uu,everythinginitial,L)
+    L = get_L_from_constant_h(uu,pipesystem)
+    d = get_d_from_L_outflow(uu,pipesystem,L)
 
-    gamma = everythinginitial.gamma
-    h = everythinginitial.h
-
-    uueverything = UUtoEverything(uu,gamma)
+    gamma = pipesystem.gamma
+    uueverything = UUtoEverything(uu,pipesystem)
 
     u = uueverything.u
     ρ = uueverything.ρ
@@ -307,15 +296,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         still working on this
     """
 
-    function set_inlet_constant_h!(uu::Array,everythinginitial,Δx::Float64,Δt::Float64)
+    function set_inlet_constant_h!(uu::Array,pipesystem,Δt::Float64)
 
-        L = get_L_from_inflow_h(uu,everythinginitial,Δx)
-        d = get_d_from_L_inflow(uu,everythinginitial,L)
+        L = get_L_from_inflow_h(uu,pipesystem)
+        d = get_d_from_L_inflow(uu,pipesystem,L)
 
-        gamma = everythinginitial.gamma
-        h = everythinginitial.h
-
-        uueverything = UUtoEverything(uu,gamma)
+        gamma = pipesystem.gamma
+        uueverything = UUtoEverything(uu,pipesystem)
 
         u = uueverything.u
         ρ = uueverything.ρ
@@ -328,15 +315,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
         return uubegin
         end
 
-        function set_inlet_interface!(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64,Δt::Float64)
+        function set_inlet_interface!(uu1::Array,uu2::Array,pipesystem1,pipesystem2,Δt::Float64)
 
-            L = get_L_from_interface(uu1,uu2,everythinginitial1,everythinginitial2,Δx)
-            d = get_d_from_L_inflow(uu2,everythinginitial1,L)
+            L = get_L_from_interface(uu1,uu2,pipesystem1,pipesystem2)
+            d = get_d_from_L_inflow(uu2,pipesystem2,L)
 
-            gamma = everythinginitial2.gamma
-            h = everythinginitial2.h
-
-            uueverything = UUtoEverything(uu2,gamma)
+            gamma = pipesystem2.gamma
+            uueverything = UUtoEverything(uu2,pipesystem2)
 
             u = uueverything.u
             ρ = uueverything.ρ
@@ -350,15 +335,13 @@ function get_L_from_interface(uu1::Array,uu2::Array,everythinginitial1,everythin
             end
 
 
-        function set_outlet_interface!(uu1::Array,uu2::Array,everythinginitial1,everythinginitial2,Δx::Float64,Δt::Float64)
+        function set_outlet_interface!(uu1::Array,uu2::Array,pipesystem1,pipesystem2,Δt::Float64)
 
-            L = get_L_from_interface(uu1,uu2,everythinginitial1,everythinginitial2,Δx)
-            d = get_d_from_L_outflow(uu1,everythinginitial2,L)
+            L = get_L_from_interface(uu1,uu2,pipesystem1,pipesystem2)
+            d = get_d_from_L_outflow(uu1,pipesystem1,L)
 
-            gamma = everythinginitial1.gamma
-            h = everythinginitial1.h
-
-            uueverything = UUtoEverything(uu1,gamma)
+            gamma = pipesystem1.gamma
+            uueverything = UUtoEverything(uu1,pipesystem1)
 
             u = uueverything.u
             ρ = uueverything.ρ

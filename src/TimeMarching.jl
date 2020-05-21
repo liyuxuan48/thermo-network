@@ -27,11 +27,10 @@ using ..FiniteDifference
     The current function is only good for u<=c (speed of sound)
 """
 
-function stegerwarmingrk1!(t,uu,righthand,shocktubesystem)
+function stegerwarmingrk1!(t,uu,righthand,shocktubesystem,Δt)
 
     gamma=shocktubesystem.gamma
-    Δt=shocktubesystem.Δt
-    Δx=shocktubesystem.Δz
+    Δx=shocktubesystem.Δx
 
 
     #u<=c
@@ -91,14 +90,13 @@ end
     The current function is only good for information tavelling to the right
 """
 
-function upwindrk1!(t::Any,w::Any,impulsesystem::Any)
+function upwindrk1!(t::Any,w::Any,impulsesystem::Any,Δt::Any)
 
     ρ = impulsesystem.ρ
     G = impulsesystem.G
     P = impulsesystem.P
     Ac = impulsesystem.Ac
     qw = impulsesystem.qw
-    Δt = impulsesystem.Δt
     Δz = impulsesystem.Δz
 
     out = deepcopy(w) .+ (-G/ρ.*upwind(w,Δz) .+ P*qw/Ac/ρ).*Δt
