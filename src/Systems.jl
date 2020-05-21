@@ -21,7 +21,6 @@ struct ImpulseSystem
     P
     Ac
     qw
-    Δt
     Δz
 end
 
@@ -29,14 +28,12 @@ end
 shocktubesystem is a struct containing
 
     gamma = gamma
-    Δt = time interval
-    Δz = space interval
+    Δx = space interval
 """
 
 struct ShockTubeSystem
     gamma
-    Δt
-    Δz
+    Δx
 end
 
 """
@@ -64,7 +61,9 @@ struct UUtoEverything
     c
 end
 
-function UUtoEverything(uu,gamma)
+function UUtoEverything(uu,pipesystem::ShockTubeSystem)
+
+    gamma = pipesystem.gamma
 
     u = uu[2,:]./uu[1,:]
     ρ = uu[1,:]
